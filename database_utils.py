@@ -27,11 +27,12 @@ class DatabaseConnector:
         # Check for None values
         if None in (RDS_HOST, RDS_PASSWORD, RDS_USER, RDS_DATABASE, RDS_PORT):
             raise ValueError("One or more credentials is None. Check key names in the YAML file.")
+        # Might be worth raising an exception to notify user 
 
         connection_string = f"postgresql://{db_creds['RDS_USER']}:{db_creds['RDS_PASSWORD']}@{db_creds['RDS_HOST']}:{db_creds['RDS_PORT']}/{db_creds['RDS_DATABASE']}"
 
         # Print the generated connection string for Debugging
-        print("Generated Connection String:", connection_string)
+        #print("Generated Connection String:", connection_string)
 
         # Initialize and return the SQLAlchemy database engine
         engine = create_engine(connection_string)
@@ -80,11 +81,13 @@ class DatabaseConnector:
         except Exception as e:
             print(f"Error connecting to the database: {e}")
   
-# Example usage:
+# Call the methods
 connector = DatabaseConnector()
-connector.read_db_creds()
-connector.init_db_engine()
+db_creds = connector.read_db_creds()
+engine = connector.init_db_engine()
 tables = connector.list_db_tables()
+print("Database Credentials:", db_creds)
+print("Database Engine:", engine)
 print("Tables in the database:", tables)
 
 
