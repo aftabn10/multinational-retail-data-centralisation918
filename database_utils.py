@@ -43,19 +43,6 @@ class DatabaseConnector:
         # It explicitly uses the PostgreSQL dialect to get the table names.
         return self.engine.dialect.get_table_names(self.engine.connect())
     
-# connector = DatabaseConnector()
-# connector.list_db_tables()
-
-#Step 5
-    def read_rds_table(self, table_name):
-
-        query = f"SELECT * FROM {table_name}"
-        result = self.engine.execute(query)
-
-        df = pd.DataFrame(result.fetchall(), columns=result.keys())
-
-        return df
-
 #Step 7
     def upload_to_db(self, table_name, df):
         metadata = MetaData()
@@ -71,7 +58,7 @@ class DatabaseConnector:
         #Step 8
     def upload_to_local_db(self, df):
         db_username = "postgres"
-        db_password = "pass1234"
+        db_password = "password"
         db_host = "localhost"  # Usually "localhost" if the database is on the same machine
         db_port = "5432"  # Usually 5432 for PostgreSQL
         db_name = "sales_db"
@@ -95,5 +82,9 @@ class DatabaseConnector:
   
 # Example usage:
 connector = DatabaseConnector()
+connector.read_db_creds()
 connector.init_db_engine()
+tables = connector.list_db_tables()
+print("Tables in the database:", tables)
+
 
