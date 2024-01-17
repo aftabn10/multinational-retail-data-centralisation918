@@ -47,7 +47,7 @@ class DatabaseConnector:
 #Step 7
     def upload_to_db(self, table_name, df):
         metadata = MetaData()
-        metadata.reflect(bind=engine)
+        metadata.reflect(bind=self.engine)
         target_table = metadata.tables[table_name]
 
         # Insert statement
@@ -59,7 +59,7 @@ class DatabaseConnector:
         #Step 8
     def upload_to_local_db(self, df):
         db_username = "postgres"
-        db_password = "password"
+        db_password = "pass1234"
         db_host = "localhost"  # Usually "localhost" if the database is on the same machine
         db_port = "5432"  # Usually 5432 for PostgreSQL
         db_name = "sales_db"
@@ -80,14 +80,6 @@ class DatabaseConnector:
 
         except Exception as e:
             print(f"Error connecting to the database: {e}")
-  
-# Call the methods
-connector = DatabaseConnector()
-db_creds = connector.read_db_creds()
-engine = connector.init_db_engine()
-tables = connector.list_db_tables()
-print("Database Credentials:", db_creds)
-print("Database Engine:", engine)
-print("Tables in the database:", tables)
+
 
 
