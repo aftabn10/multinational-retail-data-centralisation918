@@ -1,5 +1,6 @@
 from database_utils import DatabaseConnector
 import pandas as pd
+import tabula
 
 class DataExtractor:
     def __init__(self, connector):
@@ -18,3 +19,11 @@ class DataExtractor:
         except Exception as e:
             print(f"An error occurred: {e}")
             return None
+        
+    # Task 4 Step 2    
+    # retrieve_pdf_data
+    # Works
+    def retrieve_pdf_data(self, link):
+        pdf_df = tabula.read_pdf(link, pages='all')
+        return pdf_df
+    
