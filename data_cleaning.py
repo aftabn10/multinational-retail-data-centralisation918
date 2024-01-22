@@ -7,58 +7,53 @@
 # wrong information.
 
 from database_utils import DatabaseConnector
+from data_extraction import DataExtractor
 from sqlalchemy import Table, MetaData, select, engine, create_engine
 import pandas as pd
 
 class DataCleaning:
-    metadata = MetaData()
-    metadata.reflect(bind=engine)  # Reflect the existing database tables
+    def __init__(self, connector):
+        self.connector = connector
+        self.metadata = MetaData()
+        self.metadata.reflect(bind=self.connector.engine)
+        self.my_table = self.metadata.tables['legacy_users']
 
-    my_table = metadata.tables['legacy_users']  # Access the 'users' table directly
-
-    @classmethod
-    def query_data(cls):
-        #limit_value = 10
-        with engine.connect() as connection:
-            select_query = select(cls.my_table.c)  # Select all columns from the table
+    def query_data(self):
+        with self.connector.engine.connect() as connection:
+            select_query = select(self.my_table.c)
             result = connection.execute(select_query)
-
-            # Fetch all rows into a Pandas DataFrame
             df = pd.DataFrame(result.fetchall(), columns=result.keys())
+            return df
 
-            # *** NULL FIX ***
-            # To replace NA values in DataFrame use inplace=True so don't need to assign back to df
-            df.fillna(value=0, inplace=True)
+    def clean_user_data(self):
+        df = self.query_data()
 
-            # *** LAST NAME COLUMN FIX 
-            # looked through the incorrect LAST NAME which showed whole row is wrong 
-            # so will delete record (INDEX = 5309)
-            # GO WITH THIS TO REMOVE LAST NAME ROW ERROR
-            row_to_print = df[df['last_name'] == '4YSEX8AY1Z']
-            # # Set display to show all cols
-            pd.set_option('display.max_columns', None)
-            # print(row_to_print)
-            pd.reset_option('display.max_columns')
-            index_to_delete = 5309
-            df.drop(index_to_delete, inplace=True)
+        # *** NULL FIX ***
+        df.fillna(value=0, inplace=True)
 
-            # *** COUNTRY ***
-            # UK = 9371, Germany = 4708, US = 1205, NULL = 21, GARBAGE = 15
-            # need to remove anything that does not equal
-            # the ~ negates the condition to 'not in' 
-            row_to_print = df[~df['country'].isin(['United Kingdom', 'Germany', 'United States', 'NULL'])]
-            #print(row_to_print)
-            index_to_delete = [752, 1047, 2997, 3539, 5309, 6426, 8398, 9026, 10224, 10373, 11381, 12197, 13135, 14124, 14523]
-            df.drop(index_to_delete, inplace=True)
-            # WILL NEED TO DELETE 15 rows as all COLUMNS HAVE ERRORS
+        # *** LAST NAME COLUMN FIX ***
+        # Remove rows where 'last_name' is '4YSEX8AY1Z'
+        df = df[df['last_name'] != '4YSEX8AY1Z']
 
-            # *** COUNTRY CODE ***
-            # GB = 9365, DE = 4708, US = 1205, NULL = 21, GGB = 6, GARBAGE = 15
-            # First replace all GGB values correctly with GB
-            df['country'] = df['country'].str.replace('GGB', 'GB')
-            #df['country'].replace('GGB', 'GB', inplace=True)
-            # WILL NEED TO DELETE 15 rows as all COLUMNS HAVE ERRORS (will be done in Country Fix)
+        # *** COUNTRY ***
+        # Remove rows where 'country' is not in the specified list
+        valid_countries = ['United Kingdom', 'Germany', 'United States', 'NULL']
+        df = df[df['country'].isin(valid_countries)]
 
-            print(df.info())
+        # *** COUNTRY CODE ***
+        # Replace 'GGB' with 'GB'
+        df['country'] = df['country'].str.replace('GGB', 'GB')
+
+        # Print information about the cleaned DataFrame
+        print(df.info())
+
+        # Return the cleaned DataFrame
+        return df
+
+    def clean_card_data(self, pdf_df):
+         # *** Analysis ***
+         print("Data Analysis:")
+         print(pdf_df.describe())
+         # Add more analysis steps based on your requirements
         
-# Call the query_data method to execute the query
+         return pdf_df
