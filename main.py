@@ -30,5 +30,10 @@ table_name = 'legacy_users'
 df = extractor.read_rds_table(connector, table_name)
 print(df.head())  # Display the first few rows of the DataFrame
 
+# TASK 3 STEP 6
+# Check shape before cleaning
+print("Before cleaning:", df.shape)
 # Pass df to DataCleaning methods
 cleaned_df = cleaning.clean_user_data(df)
+# Check shape after cleaning 
+print("After cleaning:", cleaned_df.shape)
