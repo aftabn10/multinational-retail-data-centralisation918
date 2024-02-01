@@ -2,27 +2,33 @@ from database_utils import DatabaseConnector
 from data_extraction import DataExtractor
 from data_cleaning import DataCleaning
 
-# Instantiate the classes
+#Instantiate the classes
 connector = DatabaseConnector()
-extractor = DataExtractor(connector)
-cleaner = DataCleaning(connector)
+extractor = DataExtractor()
+cleaning = DataCleaning()
 
-# Use init_db_engine method to create an engine
+# Read database credentials
 db_creds = connector.read_db_creds()
-engine = connector.init_db_engine()
-tables = connector.list_db_tables()
-
-# Use the read_rds_table method through the DataExtractor instance
-# print("Before read_rds_table method call") # Task 3 Step 4 # Not Working
-#df = extractor.read_rds_table('legacy_users')
-# print("After read_rds_table method call")
-link = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf'
-pdf_df = extractor.retrieve_pdf_data(link)
-clean_card = cleaner.clean_card_data(pdf_df)
-
 print("Database Credentials:", db_creds)
+
+# Initialize the database engine
+engine = connector.init_db_engine()
+# TASK 3 STEP 4
+# Set the engine attribute in your connector instance
+connector.engine = engine
 print("Database Engine:", engine)
-print("Tables in the database:", tables)
-#print(df.head())
-print(clean_card)
-#print(clean_card)
+
+# TASK 3 STEP 4
+# List all tables in the database
+tables = connector.list_db_tables()
+print("Database Tables:", tables)
+
+# Test 'users table' from list_db_tables
+table_name = 'legacy_users'
+
+# Read the table into a Pandas DataFrame
+df = extractor.read_rds_table(connector, table_name)
+print(df.head())  # Display the first few rows of the DataFrame
+
+# Pass df to DataCleaning methods
+cleaned_df = cleaning.clean_user_data(df)

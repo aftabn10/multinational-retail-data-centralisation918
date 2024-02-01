@@ -1,29 +1,18 @@
 from database_utils import DatabaseConnector
+from sqlalchemy import text
 import pandas as pd
-import tabula
 
 class DataExtractor:
-    def __init__(self, connector):
-        self.connector = connector
+# TASK 3 STEP5
+    def __init__(self):
+        pass
 
-    def read_rds_table(self, table_name):
-        try:
-            # Use the init_db_engine method to create an engine
-            engine = self.connector.init_db_engine()
+    def read_rds_table(self, db_connector, table_name):
+        # Get the engine from the DatabaseConnector
+        engine = db_connector.engine
 
-            # Use the engine to extract the table to a pandas DataFrame
-            query = f"SELECT * FROM {table_name}"
-            df = pd.read_sql_query(query, engine)
+        # Use the engine to read the table into a Pandas DataFrame
+        query = f"SELECT * FROM {table_name}"
+        df = pd.read_sql_query(sql=text(query), con=engine.connect())
 
-            return df
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return None
-        
-    # Task 4 Step 2    
-    # retrieve_pdf_data
-    # Works
-    def retrieve_pdf_data(self, link):
-        pdf_df = tabula.read_pdf(link, pages='all')
-        return pdf_df
-    
+        return df
